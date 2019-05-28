@@ -11,6 +11,7 @@ from models.curso_schema import CursoSchema
 from models.matricula import Matricula
 from models.matricula_schema import MatriculaSchema
 from uuid import uuid4
+from datetime import datetime
 # from dao.db import db
 
 app = Flask(__name__)
@@ -188,27 +189,45 @@ def delete_curso(curso_id=None):
     return jsonify({'mensagem': retorno})
 
 
-# ---------------MATRICULA
-
-
 @app.route("/matricula", methods=['POST'])
-def create_mat():
-    request_data = request.get_json()
-    new_Matricula = Matricula(str(len(matriculas) + 1), request_data['id_aluno'],
-                              request_data['id_curso'], request_data['data'])
-    matriculas.append(new_matricula)
-    return jsonify(messages["created"])
+def create_matricula():
+    alunos = mongo.db.alunos
+    cursos = mongo.db.cursos
+    matriculas = mongo.db.matriculas
+    id_aluno = request.json['id_aluno']
+    id_curso = request.json['id_curso']
+    data = datetime.now()
+
+    valid_id_aluno = alunos.find_one({'id': id_aluno})
+    if not valid_id_aluno:
+        retorno = "id do aluno não encontrado"
+        return jsonify(retorno)
+    
+    valid_id_curso = cursos.find_one({'id': id_curso})
+    if not valid_id_curso:
+        retorno = "id do curso não encontrado"
+        return jsonify(retorno)
+    id = gera_id()
+    matriculas.insert({
+        'id': id,
+        'id_aluno': id_aluno,
+        'id_curso': id_curso,
+        'data': data})
+
+    return jsonify({'result': 'matriculado!', "id": id})
 
 
 @app.route("/matricula/<matricula_id>", methods=['DELETE'])
-def delete_matricula(matricula_id=None):
-    for matricula in matriculas:
-        if matricula.id == matricula_id:
-            print(matriculas.index(matricula))
-            matriculas.pop()
-            return jsonify(messages["deleted"])
-        else:
-            return jsonify(messages["none"])
+def delete_matricula(matricula_id):
+    mongo.db.matriculas.remove({'id': matricula_id})
+
+    matriculas = mongo.db.matriculas
+    matricula_obj = matriculas.find_one({'id': matricula_id})
+    if matricula_obj != None:
+        retorno = "Error"
+    else:
+        retorno = "matricula excluido"
+    return jsonify({'mensagem': retorno})
 
 
 if __name__ == '__main__':
