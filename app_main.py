@@ -93,7 +93,7 @@ def create_aluno():
         'data_nascimento': data_nascimento,
         'cpf': cpf})
 
-    return jsonify({'result': 'ok', "id": id})
+    return jsonify({'result': 'Aluno criado com sucesso!'})
 
 
 @app.route("/aluno/<aluno_id>", methods=['PUT'])
@@ -116,7 +116,7 @@ def set_aluno_name(aluno_id):
         }
     )
 
-    return jsonify({"message": "Só por Deus"})
+    return jsonify({"message": "Curso atualizado com sucesso!"})
 
 
 @app.route("/aluno/<aluno_id>", methods=['DELETE'])
@@ -203,6 +203,34 @@ def delete_curso(curso_id=None):
     else:
         retorno = "Curso excluido com sucesso"
     return jsonify({'mensagem': retorno})
+
+
+@app.route("/curso/totais", methods=['GET'])
+def get_totais():
+    matriculas = mongo.db.matriculas
+    cursos = mongo.db.cursos
+
+    id_cursos = []
+    for matricula in matriculas.find():
+        id_cursos.append(matricula['id_curso'])
+
+    id_cursos_not_equals = set(id_cursos)
+    nome_cursos = []
+    
+    for curso in id_cursos_not_equals:
+        cursos_obj = cursos.find_one({'id': curso})
+        if cursos_obj:
+            nome = cursos_obj['nome']
+            nome_cursos.append(nome)
+
+    soma_cursos = []
+
+    for quantidade in id_cursos_not_equals:
+        soma_cursos.append(id_cursos.count(quantidade))
+
+    dict_cursos = dict(zip(nome_cursos, soma_cursos))
+
+    return jsonify({'Totais de matriculados': dict_cursos})
 
 
 @app.route("/matricula", methods=['POST'])
