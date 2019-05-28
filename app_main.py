@@ -151,17 +151,12 @@ def get_curso(curso_id=None):
 def create_curso():
     alunos = mongo.db.alunos
     nome = request.json['nome']
-    sobrenome = request.json['sobrenome']
-    data_nascimento = request.json['data_nascimento']
-    cpf = request.json['cpf']
-    id = gera_id()
+    carga_horaria = request.json['carga_horaria']
 
     alunos.insert({
-        'id': id,
+        'id': gera_id(),
         'nome': nome,
-        'sobrenome': sobrenome,
-        'data_nascimento': data_nascimento,
-        'cpf': cpf})
+        'carga_horaria': carga_horaria})
 
     return jsonify({'result': 'ok'})
 
