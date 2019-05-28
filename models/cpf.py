@@ -15,6 +15,7 @@ class Cpf:
         """
         return "%s.%s.%s-%s" % (cpf[0:3], cpf[3:6], cpf[6:9], cpf[9:11])
 
+    @classmethod
     def validate(self, cpf):
         """
         Method to validate a brazilian CPF number
@@ -27,6 +28,7 @@ class Cpf:
         >>> print Cpf().validate('91289037731')
         False
         """
+
         cpf_invalidos = [11*str(i) for i in range(10)]
         if cpf in cpf_invalidos:
             return False
