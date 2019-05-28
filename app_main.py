@@ -136,6 +136,24 @@ def delete_aluno(aluno_id):
     return jsonify({'mensagem': retorno})
 
 
+@app.route("/aluno/totais/<aluno_id>", methods=['GET'])
+def get_totais_alunos(aluno_id):
+    matriculas = mongo.db.matriculas
+    alunos = mongo.db.alunos
+
+    id_alunos = []
+    for matricula in matriculas.find():
+        if aluno_id == matricula['id_aluno']:
+            id_alunos.append(matricula['id_aluno'])
+    id_alunos_not_equals = set(id_alunos)
+
+    soma_alunos = 0
+
+    for quantidade in id_alunos_not_equals:
+        soma_alunos = id_alunos.count(quantidade)
+
+    return jsonify({'Total de cursos matriculados': soma_alunos})
+
 @app.route("/curso", methods=['GET'])
 def get_all_cursos():
     cursos = mongo.db.cursos
