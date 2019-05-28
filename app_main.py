@@ -8,7 +8,7 @@ from flask_swagger import swagger
 # from models.aluno import Aluno
 # from models.aluno_schema import AlunoSchema
 # from models.curso import Curso
-# from models.curso_schema import CursoSchema
+from models.curso_schema import CursoSchema
 # from models.matricula import Matricula
 # from models.matricula_schema import MatriculaSchema
 from uuid import uuid4
@@ -125,7 +125,7 @@ def delete_aluno(aluno_id):
 
     alunos = mongo.db.alunos
     aluno_obj = alunos.find_one({'id': aluno_id})
-    if aluno_obj != None:
+    if aluno_obj is not None:
         retorno = "Error"
     else:
         retorno = "aluno excluido"
@@ -146,6 +146,7 @@ def get_all_cursos():
 
     return jsonify({'cursos': retorno})
 
+
 @app.route("/curso/<curso_id>", methods=['GET'])
 def get_curso(curso_id=None):
     cursos = mongo.db.cursos
@@ -159,11 +160,11 @@ def get_curso(curso_id=None):
 
 @app.route("/curso", methods=['POST'])
 def create_curso():
-    alunos = mongo.db.cursos
+    cursos = mongo.db.cursos
     nome = request.json['nome']
     carga_horaria = request.json['carga_horaria']
 
-    alunos.insert({
+    cursos.insert({
         'id': gera_id(),
         'nome': nome,
         'carga_horaria': carga_horaria})
@@ -173,10 +174,11 @@ def create_curso():
 
 @app.route("/curso/<curso_id>", methods=['PUT'])
 def update_curso(curso_id=None):
-    request_data = request.get_json()
-    nome = request_data['nome']
-    carga_horaria = request_data['carga_horaria']
+    request_obj = CursoSchema().load(request.get_json())
+    if request_obj.errors:
+        return jsonify({"errorCode": [request_obj.errors]})
 
+    request_data = request_obj.data
     mongo.db.cursos.update_one(
         {"id": curso_id},
         {
@@ -187,7 +189,7 @@ def update_curso(curso_id=None):
         }
     )
 
-    return jsonify({"message": "Curso atualizado com sucesso!"})
+    return jsonify({"message": "Curso atualizado com sucesso!"}), 201
 
 
 @app.route("/curso/<curso_id>", methods=['DELETE'])
@@ -237,7 +239,7 @@ def delete_matricula(matricula_id):
 
     matriculas = mongo.db.matriculas
     matricula_obj = matriculas.find_one({'id': matricula_id})
-    if matricula_obj != None:
+    if matricula_obj is not None:
         retorno = "Error"
     else:
         retorno = "matricula excluido"
