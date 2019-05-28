@@ -48,15 +48,29 @@ def home():
 
 @app.route("/aluno", methods=['GET'])
 def get_all_alunos():
+    matriculas = mongo.db.matriculas
     alunos = mongo.db.alunos
     retorno = []
+
     for aluno_obj in alunos.find():
+        id_alunos = []
+        for matricula in matriculas.find():
+            if aluno_obj['id'] == matricula['id_aluno']:
+                id_alunos.append(matricula['id_aluno'])
+        id_alunos_not_equals = set(id_alunos)
+
+        soma_cursos = 0
+
+        for quantidade in id_alunos_not_equals:
+            soma_cursos = id_alunos.count(quantidade)
+
         retorno.append(
             {'id': aluno_obj['id'],
              'nome': aluno_obj['nome'],
              'sobrenome': aluno_obj['sobrenome'],
              'data_nascimento': aluno_obj['data_nascimento'],
-             'cpf': aluno_obj['cpf']})
+             'cpf': aluno_obj['cpf'],
+             'cursos matriculados': soma_cursos})
         if len(retorno) == 0:
             return jsonify({"data": Messages.NONE})
 
@@ -157,13 +171,26 @@ def get_totais_alunos(aluno_id):
 
 @app.route("/curso", methods=['GET'])
 def get_all_cursos():
+    matriculas = mongo.db.matriculas
     cursos = mongo.db.cursos
     retorno = []
-    for cursos_obj in cursos.find():
+    for curso_obj in cursos.find():
+        id_cursos = []
+        for matricula in matriculas.find():
+            if curso_obj['id'] == matricula['id_curso']:
+                id_cursos.append(matricula['id_curso'])
+        id_cursos_not_equals = set(id_cursos)
+
+        soma_cursos = 0
+
+        for quantidade in id_cursos_not_equals:
+            soma_cursos = id_cursos.count(quantidade)
+
         retorno.append(
-            {'id': cursos_obj['id'],
-             'nome': cursos_obj['nome'],
-             'carga_horaria': cursos_obj['carga_horaria']})
+            {'id': curso_obj['id'],
+             'nome': curso_obj['nome'],
+             'carga_horaria': curso_obj['carga_horaria'],
+             'quantidade de inscritos': soma_cursos})
 
         if len(retorno) == 0:
             return jsonify({"message": Messages.EMPTY})
