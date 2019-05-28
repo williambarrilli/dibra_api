@@ -12,6 +12,8 @@ from flask_swagger import swagger
 # from models.matricula import Matricula
 # from models.matricula_schema import MatriculaSchema
 from uuid import uuid4
+from datetime import datetime
+# from dao.db import db
 
 app = Flask(__name__)
 
@@ -83,137 +85,163 @@ def create_aluno():
     sobrenome = request.json['sobrenome']
     data_nascimento = request.json['data_nascimento']
     cpf = request.json['cpf']
-    id = gera_id()
 
     alunos.insert({
-        'id': id,
+        'id': gera_id(),
         'nome': nome,
         'sobrenome': sobrenome,
         'data_nascimento': data_nascimento,
         'cpf': cpf})
 
-    return jsonify({'result': 'ok'})
+    return jsonify({'result': 'ok', "id": id})
 
 
-# @app.route("/aluno/<aluno_id>", methods=['PUT'])
-# def set_aluno_name(aluno_id):
-#     request_data = request.get_json()
-#     nome = request_data['nome']
-#     canal = request_data['sobrenome']
-#     valor = request_data['valor']
-#     obs = request_data['obs']
-#     mongo.db.alunos.update_one(
-#         {"id": aluno_id},
-#         {
-#             "$set": {
-#                 "nome": request_data['nome'],
-#                 "sobrenome": request_data['sobrenome'],
-#                 "data_nascimento": request_data['data_nascimento'],
-#                 "cpf": request_data['cpf']
-#             }
-#         }
-#     )
+@app.route("/aluno/<aluno_id>", methods=['PUT'])
+def set_aluno_name(aluno_id):
+    request_data = request.get_json()
+    nome = request_data['nome']
+    sobrenome = request_data['sobrenome']
+    data_nascimento = request_data['data_nascimento']
+    cpf = request_data['cpf']
 
-#     return jsonify({"message": "Só por Deus"})
+    mongo.db.alunos.update_one(
+        {"id": aluno_id},
+        {
+            "$set": {
+                "nome": nome,
+                "sobrenome": sobrenome,
+                "data_nascimento": data_nascimento,
+                "cpf": cpf
+            }
+        }
+    )
 
-
-# @app.route("/aluno/<aluno_id>", methods=['DELETE'])
-# def delete_aluno(aluno_id):
-#     mongo.db.alunos.remove({'id': aluno_id})
-
-#     alunos = mongo.db.alunos
-#     aluno_obj = alunos.find_one({'id': aluno_id})
-#     if aluno_obj != None:
-#         retorno = "Error"
-#     else:
-#         retorno = "aluno excluido"
-#     return jsonify({'mensagem': retorno})
-
-# # --------------CURSO
+    return jsonify({"message": "Só por Deus"})
 
 
-# @app.route("/curso", methods=['GET'])
-# def get_all_cursos():
-#     cursos = mongo.db.cursos
-#     retorno = []
-#     for cursos_obj in cursos.find():
-#         retorno.append(
-#             {'id': cursos_obj['id'],
-#              'nome': cursos_obj['nome'],
-#              'carga_horaria': cursos_obj['carga_horaria']})
-#         if len(retorno) == 0:
-#             return jsonify({"message": "Não há cursos cadastrados!"})
+@app.route("/aluno/<aluno_id>", methods=['DELETE'])
+def delete_aluno(aluno_id):
+    mongo.db.alunos.remove({'id': aluno_id})
 
-#     return jsonify({'cursos': retorno})
-
-# @app.route("/curso/<curso_id>", methods=['GET'])
-# def get_curso(curso_id=None):
-#     cursos = mongo.db.cursos
-#     cursos_obj = cursos.find_one({'id': curso_id})
-#     if not cursos_obj:
-#         return jsonify({"message": "Curso não encontrado!"})
-
-#     cursos_obj.pop('_id')
-#     return jsonify(cursos_obj)
+    alunos = mongo.db.alunos
+    aluno_obj = alunos.find_one({'id': aluno_id})
+    if aluno_obj != None:
+        retorno = "Error"
+    else:
+        retorno = "aluno excluido"
+    return jsonify({'mensagem': retorno})
 
 
-# @app.route("/curso", methods=['POST'])
-# def create_curso():
-#     alunos = mongo.db.alunos
-#     nome = request.json['nome']
-#     carga_horaria = request.json['carga_horaria']
+@app.route("/curso", methods=['GET'])
+def get_all_cursos():
+    cursos = mongo.db.cursos
+    retorno = []
+    for cursos_obj in cursos.find():
+        retorno.append(
+            {'id': cursos_obj['id'],
+             'nome': cursos_obj['nome'],
+             'carga_horaria': cursos_obj['carga_horaria']})
+        if len(retorno) == 0:
+            return jsonify({"message": "Não há cursos cadastrados!"})
 
-#     alunos.insert({
-#         'id': gera_id(),
-#         'nome': nome,
-#         'carga_horaria': carga_horaria})
+    return jsonify({'cursos': retorno})
 
-#     return jsonify({'result': 'ok'})
+@app.route("/curso/<curso_id>", methods=['GET'])
+def get_curso(curso_id=None):
+    cursos = mongo.db.cursos
+    cursos_obj = cursos.find_one({'id': curso_id})
+    if not cursos_obj:
+        return jsonify({"message": "Curso não encontrado!"})
 
-
-# @app.route("/curso/<curso_id>", methods=['PUT'])
-# def update_curso(curso_id=None):
-#     request_data = request.get_json()
-#     for curso in cursos:
-#         if curso.id == curso_id:
-#             curso.nome = request_data['nome']
-#             curso.carga_horaria = request_data['carga_horaria']
-#             return jsonify(messages["updated"])
-#     return jsonify(messages["empty"])
-
-
-# @app.route("/curso/<curso_id>", methods=['DELETE'])
-# def delete_curso(curso_id=None):
-#     for curso in cursos:
-#         if curso.id == curso_id:
-#             print(cursos.index(curso))
-#             cursos.pop()
-#             return jsonify(messages["deleted"])
-#         else:
-#             return jsonify(messages["none"])
+    cursos_obj.pop('_id')
+    return jsonify(cursos_obj)
 
 
-# # ---------------MATRICULA
+@app.route("/curso", methods=['POST'])
+def create_curso():
+    alunos = mongo.db.cursos
+    nome = request.json['nome']
+    carga_horaria = request.json['carga_horaria']
+
+    alunos.insert({
+        'id': gera_id(),
+        'nome': nome,
+        'carga_horaria': carga_horaria})
+
+    return jsonify({'result': 'Curso criado com sucesso!'})
 
 
-# @app.route("/matricula", methods=['POST'])
-# def create_mat():
-#     request_data = request.get_json()
-#     new_Matricula = Matricula(str(len(matriculas) + 1), request_data['id_aluno'],
-#                               request_data['id_curso'], request_data['data'])
-#     matriculas.append(new_matricula)
-#     return jsonify(messages["created"])
+@app.route("/curso/<curso_id>", methods=['PUT'])
+def update_curso(curso_id=None):
+    request_data = request.get_json()
+    nome = request_data['nome']
+    carga_horaria = request_data['carga_horaria']
+
+    mongo.db.cursos.update_one(
+        {"id": curso_id},
+        {
+            "$set": {
+                "nome": request_data['nome'],
+                "carga_horaria": request_data['carga_horaria']
+            }
+        }
+    )
+
+    return jsonify({"message": "Curso atualizado com sucesso!"})
 
 
-# @app.route("/matricula/<matricula_id>", methods=['DELETE'])
-# def delete_matricula(matricula_id=None):
-#     for matricula in matriculas:
-#         if matricula.id == matricula_id:
-#             print(matriculas.index(matricula))
-#             matriculas.pop()
-#             return jsonify(messages["deleted"])
-#         else:
-#             return jsonify(messages["none"])
+@app.route("/curso/<curso_id>", methods=['DELETE'])
+def delete_curso(curso_id=None):
+    mongo.db.cursos.remove({'id': curso_id})
+
+    cursos = mongo.db.cursos
+    curso_obj = cursos.find_one({'id': curso_id})
+    if curso_obj is not None:
+        retorno = "Erro ao excluir curso"
+    else:
+        retorno = "Curso excluido com sucesso"
+    return jsonify({'mensagem': retorno})
+
+
+@app.route("/matricula", methods=['POST'])
+def create_matricula():
+    alunos = mongo.db.alunos
+    cursos = mongo.db.cursos
+    matriculas = mongo.db.matriculas
+    id_aluno = request.json['id_aluno']
+    id_curso = request.json['id_curso']
+    data = datetime.now()
+
+    valid_id_aluno = alunos.find_one({'id': id_aluno})
+    if not valid_id_aluno:
+        retorno = "id do aluno não encontrado"
+        return jsonify(retorno)
+    
+    valid_id_curso = cursos.find_one({'id': id_curso})
+    if not valid_id_curso:
+        retorno = "id do curso não encontrado"
+        return jsonify(retorno)
+    id = gera_id()
+    matriculas.insert({
+        'id': id,
+        'id_aluno': id_aluno,
+        'id_curso': id_curso,
+        'data': data})
+
+    return jsonify({'result': 'matriculado!', "id": id})
+
+
+@app.route("/matricula/<matricula_id>", methods=['DELETE'])
+def delete_matricula(matricula_id):
+    mongo.db.matriculas.remove({'id': matricula_id})
+
+    matriculas = mongo.db.matriculas
+    matricula_obj = matriculas.find_one({'id': matricula_id})
+    if matricula_obj != None:
+        retorno = "Error"
+    else:
+        retorno = "matricula excluido"
+    return jsonify({'mensagem': retorno})
 
 
 if __name__ == '__main__':
