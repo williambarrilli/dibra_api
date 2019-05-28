@@ -117,12 +117,7 @@ def delete_aluno(aluno_id):
     return jsonify({'mensagem': retorno})
 
 
-
-
-# --------------CURSO
-
-
-@app.route(BASE_URL + "/curso", methods=['GET'])
+@app.route("/curso", methods=['GET'])
 def get_all_cursos():
     cursos = mongo.db.cursos
     retorno = []
@@ -149,7 +144,7 @@ def get_curso(curso_id=None):
 
 @app.route("/curso", methods=['POST'])
 def create_curso():
-    alunos = mongo.db.alunos
+    alunos = mongo.db.cursos
     nome = request.json['nome']
     carga_horaria = request.json['carga_horaria']
 
@@ -158,29 +153,39 @@ def create_curso():
         'nome': nome,
         'carga_horaria': carga_horaria})
 
-    return jsonify({'result': 'ok'})
+    return jsonify({'result': 'Curso criado com sucesso!'})
 
 
 @app.route("/curso/<curso_id>", methods=['PUT'])
 def update_curso(curso_id=None):
     request_data = request.get_json()
-    for curso in cursos:
-        if curso.id == curso_id:
-            curso.nome = request_data['nome']
-            curso.carga_horaria = request_data['carga_horaria']
-            return jsonify(messages["updated"])
-    return jsonify(messages["empty"])
+    nome = request_data['nome']
+    carga_horaria = request_data['carga_horaria']
+
+    mongo.db.cursos.update_one(
+        {"id": curso_id},
+        {
+            "$set": {
+                "nome": request_data['nome'],
+                "carga_horaria": request_data['carga_horaria']
+            }
+        }
+    )
+
+    return jsonify({"message": "Curso atualizado com sucesso!"})
 
 
 @app.route("/curso/<curso_id>", methods=['DELETE'])
 def delete_curso(curso_id=None):
-    for curso in cursos:
-        if curso.id == curso_id:
-            print(cursos.index(curso))
-            cursos.pop()
-            return jsonify(messages["deleted"])
-        else:
-            return jsonify(messages["none"])
+    mongo.db.cursos.remove({'id': curso_id})
+
+    cursos = mongo.db.cursos
+    curso_obj = cursos.find_one({'id': curso_id})
+    if curso_obj is not None:
+        retorno = "Erro ao excluir curso"
+    else:
+        retorno = "Curso excluido com sucesso"
+    return jsonify({'mensagem': retorno})
 
 
 # ---------------MATRICULA
