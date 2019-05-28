@@ -3,7 +3,6 @@ Click==7.0
 decorator==4.3.2
 Flask==1.0.2
 ipdb==0.11
-ipython==7.2.0
 ipython-genutils==0.2.0
 itsdangerous==1.1.0
 jedi==0.13.2
