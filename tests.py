@@ -1,11 +1,11 @@
 import unittest
 import json
 from main import app
-# from db import db
-# from models.artist import ArtistModel
+from db import db
+from models.artist import ArtistModel
 
 
-class ContatoTest(unittest.TestCase):
+class AlunoTest(unittest.TestCase):
 
     def setUp(self):
         app.config['TESTING'] = True

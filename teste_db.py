@@ -1,6 +1,6 @@
 from dao.database import DBHelper
-from models.contato import Contato
+from models.aluno import Aluno
 
 db = DBHelper()
-contato = Contato()
-db.add_contato("teste", "email", "contato@teste.com", "teste")
+aluno = Aluno()
+db.add_aluno("teste", "email", "contato@teste.com", "teste")
