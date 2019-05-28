@@ -42,7 +42,7 @@ def get_all_alunos():
     retorno = []
     for aluno_obj in alunos.find():
         retorno.append(
-            {'id': aluno_obj['id'], 'name': aluno_obj['name'], 'canal': aluno_obj['canal'], 'valor': aluno_obj['valor'], 'obs': aluno_obj['obs']})
+            {'id': aluno_obj['id'], 'nome': aluno_obj['nome'], 'sobrenome': aluno_obj['sobrenome'], 'data_nascimento': aluno_obj['data_nascimento'], 'cpf': aluno_obj['cpf']})
         if len(retorno) == 0:
             return jsonify({"message": "Não há alunos cadastrados!"})
 
@@ -53,7 +53,7 @@ def get_all_alunos():
 @app.route("/aluno/<aluno_id>", methods=['GET'])
 def get_aluno(aluno_id=None):
     alunos = mongo.db.alunos
-    aluno_obj = alunos.find_one({'name': name})
+    aluno_obj = alunos.find_one({'id': aluno_id})
     if not aluno_obj:
         retorno = "aluno não encontrado"
         return jsonify(retorno)
@@ -64,18 +64,18 @@ def get_aluno(aluno_id=None):
 @app.route("/aluno", methods=['POST'])
 def create_aluno():
     alunos = mongo.db.alunos
-    name = request.json['name']
-    canal = request.json['canal']
-    valor = request.json['valor']
-    obs = request.json['obs']
+    nome = request.json['nome']
+    sobrenome = request.json['sobrenome']
+    data_nascimento = request.json['data_nascimento']
+    cpf = request.json['cpf']
     id = gera_id()
 
     alunos.insert({
         'id': id,
-        'name': name,
-        'canal': canal,
-        'valor': valor,
-        'obs': obs})
+        'nome': nome,
+        'sobrenome': sobrenome,
+        'data_nascimento': data_nascimento,
+        'cpf': cpf})
 
     return jsonify({'result': 'ok'})
 
@@ -83,18 +83,18 @@ def create_aluno():
 @app.route("/aluno/<aluno_id>", methods=['PUT'])
 def set_aluno_name(aluno_id):
     request_data = request.get_json()   
-    new_name = request_data['name']
-    canal = request_data['canal']
+    nome = request_data['nome']
+    canal = request_data['sobrenome']
     valor = request_data['valor']
     obs = request_data['obs']
     mongo.db.alunos.update_one(
-        {"name": name},
+        {"id": aluno_id},
         {
             "$set": {
-                "name": new_name,
-                "canal": canal,
-                "valor": valor,
-                "obs": obs
+                "nome": request_data['nome'],
+                "sobrenome": request_data['sobrenome'],
+                "data_nascimento": request_data['data_nascimento'],
+                "cpf": request_data['cpf']
             }
         }
     )
@@ -103,10 +103,10 @@ def set_aluno_name(aluno_id):
 
 @app.route("/aluno/<aluno_id>", methods=['DELETE'])
 def delete_aluno(aluno_id):
-    mongo.db.alunos.remove({'name': name})
+    mongo.db.alunos.remove({'id': aluno_id})
 
     alunos = mongo.db.alunos
-    aluno_obj = alunos.find_one({'name': name})
+    aluno_obj = alunos.find_one({'id': aluno_id})
     if aluno_obj != None:
         retorno = "Error"
     else:
