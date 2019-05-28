@@ -8,6 +8,7 @@ from models.curso_schema import CursoSchema
 from models.matricula_schema import MatriculaSchema
 from uuid import uuid4
 from datetime import datetime
+from enum import Enum
 # from dao.db import db
 
 app = Flask(__name__)
@@ -19,13 +20,13 @@ app.config['MONGO_URI'] = 'mongodb://localhost:27017/restdb'
 mongo = PyMongo(app)
 #  = "/api/components/schemas"
 
-messages = {
-    "empty": {"message": "Dados vazios"},
-    "none": {"message": "aluno nao encontrado!"},
-    "created": {"message": "aluno criado com sucesso!"},
-    "updated": {"message": "aluno atualizado com sucesso!"},
-    "deleted": {"message": "aluno removido com sucesso!"}
-}
+
+class Messages(Enum):
+    EMPTY = "Dados vazios"
+    NONE = "Resultado não encontrado!"
+    CREATED = "Criado com sucesso!"
+    UPDATED = "Atualizado com sucesso!"
+    DELETED = "Removido com sucesso!"
 
 
 @app.route("/spec")
@@ -57,7 +58,7 @@ def get_all_alunos():
              'data_nascimento': aluno_obj['data_nascimento'],
              'cpf': aluno_obj['cpf']})
         if len(retorno) == 0:
-            return jsonify({"message": "Não há alunos cadastrados!"})
+            return jsonify({"data": Messages.NONE})
 
     return jsonify({'alunos': retorno})
 
@@ -67,8 +68,8 @@ def get_aluno(aluno_id=None):
     alunos = mongo.db.alunos
     aluno_obj = alunos.find_one({'id': aluno_id})
     if not aluno_obj:
-        retorno = "aluno não encontrado"
-        return jsonify(retorno)
+        return jsonify(Messages.NONE)
+
     aluno_obj.pop('_id')
     return jsonify(aluno_obj)
 
@@ -97,7 +98,7 @@ def create_aluno():
         'data_nascimento': data_nascimento,
         'cpf': cpf})
 
-    return jsonify({'data': 'Aluno Criado com sucesso', "id": aluno_id}), 200
+    return jsonify({'data': Messages.CREATED, "id": aluno_id}), 200
 
 
 @app.route("/aluno/<aluno_id>", methods=['PUT'])
@@ -120,7 +121,7 @@ def set_aluno_name(aluno_id):
         }
     )
 
-    return jsonify({"message": "Curso atualizado com sucesso!"})
+    return jsonify({"data": Messages.UPDATED})
 
 
 @app.route("/aluno/<aluno_id>", methods=['DELETE'])
@@ -130,10 +131,10 @@ def delete_aluno(aluno_id):
     alunos = mongo.db.alunos
     aluno_obj = alunos.find_one({'id': aluno_id})
     if aluno_obj is not None:
-        retorno = "Error"
+        retorno = Messages.EMPTY
     else:
-        retorno = "aluno excluido"
-    return jsonify({'mensagem': retorno})
+        retorno = Messages.DELETED
+    return jsonify({'data': retorno})
 
 
 @app.route("/aluno/totais/<aluno_id>", methods=['GET'])
@@ -165,9 +166,9 @@ def get_all_cursos():
              'carga_horaria': cursos_obj['carga_horaria']})
 
         if len(retorno) == 0:
-            return jsonify({"message": "Não há cursos cadastrados!"})
+            return jsonify({"message": Messages.EMPTY})
 
-    return jsonify({'cursos': retorno})
+    return jsonify({'data': retorno})
 
 
 @app.route("/curso/<curso_id>", methods=['GET'])
@@ -196,7 +197,7 @@ def create_curso():
         'nome': nome,
         'carga_horaria': carga_horaria})
 
-    return jsonify({'result': 'Curso criado com sucesso!'})
+    return jsonify({'data': Messages.CREATED})
 
 
 @app.route("/curso/<curso_id>", methods=['PUT'])
@@ -216,7 +217,7 @@ def update_curso(curso_id=None):
         }
     )
 
-    return jsonify({"message": "Curso atualizado com sucesso!"}), 201
+    return jsonify({"data": Messages.UPDATED}), 201
 
 
 @app.route("/curso/<curso_id>", methods=['DELETE'])
@@ -228,8 +229,8 @@ def delete_curso(curso_id=None):
     if curso_obj is not None:
         retorno = "Erro ao excluir curso"
     else:
-        retorno = "Curso excluido com sucesso"
-    return jsonify({'mensagem': retorno})
+        retorno = Messages.DELETED
+    return jsonify({'data': retorno})
 
 
 @app.route("/curso/totais", methods=['GET'])
@@ -285,7 +286,7 @@ def create_matricula():
         'id_curso': id_curso,
         'data': data})
 
-    return jsonify({'result': 'matriculado!', "id": id})
+    return jsonify({'data': Messages.CREATED, "id": id})
 
 
 @app.route("/matricula/<matricula_id>", methods=['DELETE'])
