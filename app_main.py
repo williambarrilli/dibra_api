@@ -2,6 +2,7 @@ import pymongo
 from flask import Flask
 from flask import jsonify
 from flask import request
+from flask_pymongo import PyMongo
 
 from models.aluno import Aluno
 from models.aluno_schema import AlunoSchema
@@ -9,8 +10,8 @@ from models.curso import Curso
 from models.curso_schema import CursoSchema
 from models.matricula import Matricula
 from models.matricula_schema import MatriculaSchema
-
-from dao.db import db
+from uuid import uuid4
+# from dao.db import db
 
 app = Flask(__name__)
 
@@ -19,8 +20,7 @@ app.config['MONGO_DBNAME'] = 'restdb'
 app.config['MONGO_URI'] = 'mongodb://localhost:27017/restdb'
 
 mongo = PyMongo(app)
-# BASE_URL = "/api/components/schemas"
-# BASE_URL = "/api"
+#  = "/api/components/schemas"
 
 messages = {
     "empty": {"message": "Dados vazios"},
@@ -31,9 +31,8 @@ messages = {
 }
 
 
-@app.route(BASE_URL)
-def index():
-    return "API Dibra!"
+def gera_id():
+    return str(uuid4())
 
 
 @app.route("/aluno", methods=['GET'])
@@ -42,12 +41,15 @@ def get_all_alunos():
     retorno = []
     for aluno_obj in alunos.find():
         retorno.append(
-            {'id': aluno_obj['id'], 'nome': aluno_obj['nome'], 'sobrenome': aluno_obj['sobrenome'], 'data_nascimento': aluno_obj['data_nascimento'], 'cpf': aluno_obj['cpf']})
+            {'id': aluno_obj['id'],
+             'nome': aluno_obj['nome'],
+             'sobrenome': aluno_obj['sobrenome'],
+             'data_nascimento': aluno_obj['data_nascimento'],
+             'cpf': aluno_obj['cpf']})
         if len(retorno) == 0:
             return jsonify({"message": "Não há alunos cadastrados!"})
 
     return jsonify({'alunos': retorno})
-
 
 
 @app.route("/aluno/<aluno_id>", methods=['GET'])
@@ -59,7 +61,7 @@ def get_aluno(aluno_id=None):
         return jsonify(retorno)
     aluno_obj.pop('_id')
     return jsonify(aluno_obj)
-    
+
 
 @app.route("/aluno", methods=['POST'])
 def create_aluno():
@@ -82,7 +84,7 @@ def create_aluno():
 
 @app.route("/aluno/<aluno_id>", methods=['PUT'])
 def set_aluno_name(aluno_id):
-    request_data = request.get_json()   
+    request_data = request.get_json()
     nome = request_data['nome']
     canal = request_data['sobrenome']
     valor = request_data['valor']
@@ -98,8 +100,9 @@ def set_aluno_name(aluno_id):
             }
         }
     )
-    
+
     return jsonify({"message": "Só por Deus"})
+
 
 @app.route("/aluno/<aluno_id>", methods=['DELETE'])
 def delete_aluno(aluno_id):
@@ -119,7 +122,7 @@ def delete_aluno(aluno_id):
 # --------------CURSO
 
 
-@app.route(BASE_URL + "/curso", methods=['GET'])
+@app.route("/curso", methods=['GET'])
 def get_cursos():
     print(len(curso))
     if len(curso) > 0:
@@ -127,7 +130,7 @@ def get_cursos():
     return jsonify(messages["empty"])
 
 
-@app.route(BASE_URL + "/curso/<curso_id>", methods=['GET'])
+@app.route("/curso/<curso_id>", methods=['GET'])
 def get_curso(curso_id=None):
     print(curso_id)
     for curso in cursos:
@@ -137,7 +140,7 @@ def get_curso(curso_id=None):
     return jsonify(messages["empty"])
 
 
-@app.route(BASE_URL + "/curso", methods=['POST'])
+@app.route("/curso", methods=['POST'])
 def create_curso():
     request_data = request.get_json()
     new_curso = curso(str(len(cursos) + 1), request_data['nome'],
@@ -146,7 +149,7 @@ def create_curso():
     return jsonify(messages["created"])
 
 
-@app.route(BASE_URL + "/curso/<curso_id>", methods=['PUT'])
+@app.route("/curso/<curso_id>", methods=['PUT'])
 def update_curso(curso_id=None):
     request_data = request.get_json()
     for curso in cursos:
@@ -157,7 +160,7 @@ def update_curso(curso_id=None):
     return jsonify(messages["empty"])
 
 
-@app.route(BASE_URL + "/curso/<curso_id>", methods=['DELETE'])
+@app.route("/curso/<curso_id>", methods=['DELETE'])
 def delete_curso(curso_id=None):
     for curso in cursos:
         if curso.id == curso_id:
@@ -171,7 +174,7 @@ def delete_curso(curso_id=None):
 # ---------------MATRICULA
 
 
-@app.route(BASE_URL + "/matricula", methods=['POST'])
+@app.route("/matricula", methods=['POST'])
 def create_mat():
     request_data = request.get_json()
     new_Matricula = Matricula(str(len(matriculas) + 1), request_data['id_aluno'],
@@ -180,7 +183,7 @@ def create_mat():
     return jsonify(messages["created"])
 
 
-@app.route(BASE_URL + "/matricula/<matricula_id>", methods=['DELETE'])
+@app.route("/matricula/<matricula_id>", methods=['DELETE'])
 def delete_matricula(matricula_id=None):
     for matricula in matriculas:
         if matricula.id == matricula_id:
