@@ -1,17 +1,17 @@
-import pymongo
 from flask import Flask
 from flask import jsonify
 from flask import request
 from flask_pymongo import PyMongo
+from flask_swagger import swagger
 
-from models.aluno import Aluno
-from models.aluno_schema import AlunoSchema
-from models.curso import Curso
-from models.curso_schema import CursoSchema
-from models.matricula import Matricula
-from models.matricula_schema import MatriculaSchema
+
+# from models.aluno import Aluno
+# from models.aluno_schema import AlunoSchema
+# from models.curso import Curso
+# from models.curso_schema import CursoSchema
+# from models.matricula import Matricula
+# from models.matricula_schema import MatriculaSchema
 from uuid import uuid4
-# from dao.db import db
 
 app = Flask(__name__)
 
@@ -31,8 +31,21 @@ messages = {
 }
 
 
+@app.route("/spec")
+def spec():
+    swag = swagger(app)
+    swag['info']['version'] = "1.0"
+    swag['info']['title'] = "Dibra API"
+    return jsonify(swag)
+
+
 def gera_id():
     return str(uuid4())
+
+
+@app.route("/")
+def home():
+    return " Driba API "
 
 
 @app.route("/aluno", methods=['GET'])

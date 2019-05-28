@@ -1,4 +1,4 @@
-FROM python:2.7
+FROM python:3.6
 ADD . /models
 WORKDIR /models
 EXPOSE 5000
