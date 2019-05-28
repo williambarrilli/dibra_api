@@ -122,31 +122,48 @@ def delete_aluno(aluno_id):
 # --------------CURSO
 
 
-@app.route("/curso", methods=['GET'])
-def get_cursos():
-    print(len(curso))
-    if len(curso) > 0:
-        return jsonify(CursoSchema(many=True).dump(cursos))
-    return jsonify(messages["empty"])
+@app.route(BASE_URL + "/curso", methods=['GET'])
+def get_all_cursos():
+    cursos = mongo.db.cursos
+    retorno = []
+    for cursos_obj in cursos.find():
+        retorno.append(
+            {'id': cursos_obj['id'],
+             'nome': cursos_obj['nome'],
+             'carga_horaria': cursos_obj['carga_horaria']})
+        if len(retorno) == 0:
+            return jsonify({"message": "Não há cursos cadastrados!"})
 
+    return jsonify({'cursos': retorno})
 
 @app.route("/curso/<curso_id>", methods=['GET'])
 def get_curso(curso_id=None):
-    print(curso_id)
-    for curso in cursos:
-        if curso.id == curso_id:
-            return jsonify(CursoSchema().dump(curso))
+    cursos = mongo.db.cursos
+    cursos_obj = cursos.find_one({'id': curso_id})
+    if not cursos_obj:
+        return jsonify({"message": "Curso não encontrado!"})
 
-    return jsonify(messages["empty"])
+    cursos_obj.pop('_id')
+    return jsonify(cursos_obj)
 
 
 @app.route("/curso", methods=['POST'])
 def create_curso():
-    request_data = request.get_json()
-    new_curso = curso(str(len(cursos) + 1), request_data['nome'],
-                      request_data['carga_horaria'])
-    cursos.append(new_curso)
-    return jsonify(messages["created"])
+    alunos = mongo.db.alunos
+    nome = request.json['nome']
+    sobrenome = request.json['sobrenome']
+    data_nascimento = request.json['data_nascimento']
+    cpf = request.json['cpf']
+    id = gera_id()
+
+    alunos.insert({
+        'id': id,
+        'nome': nome,
+        'sobrenome': sobrenome,
+        'data_nascimento': data_nascimento,
+        'cpf': cpf})
+
+    return jsonify({'result': 'ok'})
 
 
 @app.route("/curso/<curso_id>", methods=['PUT'])
