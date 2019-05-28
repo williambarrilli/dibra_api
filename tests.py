@@ -69,5 +69,6 @@ class AlunoTest(unittest.TestCase):
     def test_delete_artist(self):
         pass
 
+
 if __name__ == "__main__":
     unittest.main()

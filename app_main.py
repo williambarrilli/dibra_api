@@ -3,6 +3,7 @@ from flask import Flask
 from flask import jsonify
 from flask import request
 from models.aluno import Aluno
+from model.aluno_schema import AlunoSchema
 from dao.db import db
 
 app = Flask(__name__)
@@ -29,7 +30,7 @@ messages = {
 
 @app.route(BASE_URL)
 def index():
-    return "Hello World"
+    return "API Dibra!"
 
 
 @app.route(BASE_URL + "/aluno", methods=['GET'])
