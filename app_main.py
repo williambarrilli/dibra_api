@@ -51,7 +51,7 @@ def get_aluno(aluno_id=None):
     return jsonify(messages["empty"])
 
 
-@app.route(BASE_URL + "/alunoCreate", methods=['POST'])
+@app.route(BASE_URL + "/aluno", methods=['POST'])
 def create_aluno():
     request_data = request.get_json()
     new_aluno = Aluno(str(len(alunos) + 1), request_data['nome'],
@@ -61,7 +61,7 @@ def create_aluno():
     return jsonify(messages["created"])
 
 
-@app.route(BASE_URL + "/alunoUpdate/<aluno_id>", methods=['PUT'])
+@app.route(BASE_URL + "/aluno/<aluno_id>", methods=['PUT'])
 def update_aluno(aluno_id=None):
     request_data = request.get_json()
     for aluno in alunos:
@@ -83,6 +83,86 @@ def delete_aluno(aluno_id=None):
             return jsonify(messages["deleted"])
         else:
             return jsonify(messages["none"])
+
+
+
+##--------------CURSO
+
+
+@app.route(BASE_URL + "/curso", methods=['GET'])
+def get_alunos():
+    print(len(alunos))
+    if len(alunos) > 0:
+        return jsonify(AlunoSchema(many=True).dump(alunos))
+    return jsonify(messages["empty"])
+
+
+@app.route(BASE_URL + "/curso/<curso_id>", methods=['GET'])
+def get_aluno(aluno_id=None):
+    print(aluno_id)
+    for aluno in alunos:
+        if aluno.id == aluno_id:
+            return jsonify(AlunoSchema().dump(aluno))
+
+    return jsonify(messages["empty"])
+
+
+@app.route(BASE_URL + "/curso", methods=['POST'])
+def create_aluno():
+    request_data = request.get_json()
+    new_aluno = Aluno(str(len(alunos) + 1), request_data['nome'],
+                      request_data['canal'], request_data['valor'],
+                      request_data['obs'])
+    alunos.append(new_aluno)
+    return jsonify(messages["created"])
+
+
+@app.route(BASE_URL + "/curso/<curso_id>", methods=['PUT'])
+def update_aluno(aluno_id=None):
+    request_data = request.get_json()
+    for aluno in alunos:
+        if aluno.id == aluno_id:
+            aluno.nome = request_data['nome']
+            aluno.canal = request_data['canal']
+            aluno.valor = request_data['valor']
+            aluno.obs = request_data['obs']
+            return jsonify(messages["updated"])
+    return jsonify(messages["empty"])
+
+
+@app.route(BASE_URL + "/curso/<curso_id>", methods=['DELETE'])
+def delete_aluno(aluno_id=None):
+    for aluno in alunos:
+        if aluno.id == aluno_id:
+            print(alunos.index(aluno))
+            alunos.pop()
+            return jsonify(messages["deleted"])
+        else:
+            return jsonify(messages["none"])
+
+
+##---------------MATRICULA
+
+
+@app.route(BASE_URL + "/mat", methods=['POST'])
+def create_aluno():
+    request_data = request.get_json()
+    new_aluno = Aluno(str(len(alunos) + 1), request_data['nome'],
+                      request_data['canal'], request_data['valor'],
+                      request_data['obs'])
+    alunos.append(new_aluno)
+    return jsonify(messages["created"])
+
+@app.route(BASE_URL + "/mat/<mat_id>", methods=['DELETE'])
+def delete_aluno(aluno_id=None):
+    for aluno in alunos:
+        if aluno.id == aluno_id:
+            print(alunos.index(aluno))
+            alunos.pop()
+            return jsonify(messages["deleted"])
+        else:
+            return jsonify(messages["none"])
+
 
 
 if __name__ == '__main__':
