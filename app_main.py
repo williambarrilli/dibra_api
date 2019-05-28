@@ -3,14 +3,9 @@ from flask import jsonify
 from flask import request
 from flask_pymongo import PyMongo
 from flask_swagger import swagger
-
-
-# from models.aluno import Aluno
-# from models.aluno_schema import AlunoSchema
-# from models.curso import Curso
+from models.aluno_schema import AlunoSchema
 from models.curso_schema import CursoSchema
-# from models.matricula import Matricula
-# from models.matricula_schema import MatriculaSchema
+from models.matricula_schema import MatriculaSchema
 from uuid import uuid4
 from datetime import datetime
 # from dao.db import db
@@ -81,19 +76,28 @@ def get_aluno(aluno_id=None):
 @app.route("/aluno", methods=['POST'])
 def create_aluno():
     alunos = mongo.db.alunos
-    nome = request.json['nome']
-    sobrenome = request.json['sobrenome']
-    data_nascimento = request.json['data_nascimento']
-    cpf = request.json['cpf']
+    request_obj = AlunoSchema().load(request.get_json())
 
-    alunos.insert({
-        'id': gera_id(),
+    print(request_obj.data)
+    if request_obj.errors:
+        return jsonify({"errorCode": [request_obj.errors]}), 404
+
+    request_data = request_obj.data
+    nome = request_data['nome']
+    sobrenome = request_data['sobrenome']
+    data_nascimento = request_data['data_nascimento']
+    cpf = request_data['cpf']
+
+    aluno_id = gera_id()
+
+    alunos.insert_one({
+        'id': aluno_id,
         'nome': nome,
         'sobrenome': sobrenome,
         'data_nascimento': data_nascimento,
         'cpf': cpf})
 
-    return jsonify({'result': 'Aluno criado com sucesso!'})
+    return jsonify({'data': 'Aluno Criado com sucesso', "id": aluno_id}), 200
 
 
 @app.route("/aluno/<aluno_id>", methods=['PUT'])
@@ -141,6 +145,7 @@ def get_all_cursos():
             {'id': cursos_obj['id'],
              'nome': cursos_obj['nome'],
              'carga_horaria': cursos_obj['carga_horaria']})
+
         if len(retorno) == 0:
             return jsonify({"message": "Não há cursos cadastrados!"})
 
@@ -160,10 +165,14 @@ def get_curso(curso_id=None):
 
 @app.route("/curso", methods=['POST'])
 def create_curso():
-    cursos = mongo.db.cursos
+    request_obj = CursoSchema().load(request.get_json())
+    if request_obj.errors:
+        return jsonify({"errorCode": [request_obj.errors]})
+
     nome = request.json['nome']
     carga_horaria = request.json['carga_horaria']
 
+    cursos = mongo.db.cursos
     cursos.insert({
         'id': gera_id(),
         'nome': nome,
@@ -216,7 +225,7 @@ def get_totais():
 
     id_cursos_not_equals = set(id_cursos)
     nome_cursos = []
-    
+
     for curso in id_cursos_not_equals:
         cursos_obj = cursos.find_one({'id': curso})
         if cursos_obj:
@@ -246,7 +255,7 @@ def create_matricula():
     if not valid_id_aluno:
         retorno = "id do aluno não encontrado"
         return jsonify(retorno)
-    
+
     valid_id_curso = cursos.find_one({'id': id_curso})
     if not valid_id_curso:
         retorno = "id do curso não encontrado"

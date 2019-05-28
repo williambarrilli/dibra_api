@@ -3,10 +3,10 @@ from marshmallow import Schema, fields, ValidationError, validates
 
 class AlunoSchema(Schema):
     id = fields.Str(80)
-    nome = fields.Str(80)
-    sobrenome = fields.Str(100)
-    data_nascimento = fields.Str(250)
-    cpf = fields.Str(255)
+    nome = fields.Str(required=True, allow_none=False)
+    sobrenome = fields.Str(required=True, allow_none=False)
+    data_nascimento = fields.Str(required=True, allow_none=False)
+    cpf = fields.Str(required=True, allow_none=False)
 
     @validates('cpf')
     def validate_cpf(self, data):
@@ -28,18 +28,3 @@ class AlunoSchema(Schema):
             raise ValidationError('O tamanho do CPF não pode ser \
                                    maior do que 11 digitos')
 
-        selfcpf = [int(x) for x in cpf]
-
-        cpf = selfcpf[:9]
-
-        while len(cpf) < 11:
-            r = sum([(len(cpf)+1-i)*v
-                     for i, v in [(x, cpf[x]) for x in range(len(cpf))]]) % 11
-
-        if r > 1:
-            f = 11 - r
-        else:
-            f = 0
-        cpf.append(f)
-
-        return cpf
