@@ -70,33 +70,33 @@ def create_aluno():
     sobrenome = request.json['sobrenome']
     data_nascimento = request.json['data_nascimento']
     cpf = request.json['cpf']
-    id = gera_id()
 
     alunos.insert({
-        'id': id,
+        'id': gera_id(),
         'nome': nome,
         'sobrenome': sobrenome,
         'data_nascimento': data_nascimento,
         'cpf': cpf})
 
-    return jsonify({'result': 'ok'})
+    return jsonify({'result': 'ok', "id": id})
 
 
 @app.route("/aluno/<aluno_id>", methods=['PUT'])
 def set_aluno_name(aluno_id):
     request_data = request.get_json()
     nome = request_data['nome']
-    canal = request_data['sobrenome']
-    valor = request_data['valor']
-    obs = request_data['obs']
+    sobrenome = request_data['sobrenome']
+    data_nascimento = request_data['data_nascimento']
+    cpf = request_data['cpf']
+
     mongo.db.alunos.update_one(
         {"id": aluno_id},
         {
             "$set": {
-                "nome": request_data['nome'],
-                "sobrenome": request_data['sobrenome'],
-                "data_nascimento": request_data['data_nascimento'],
-                "cpf": request_data['cpf']
+                "nome": nome,
+                "sobrenome": sobrenome,
+                "data_nascimento": data_nascimento,
+                "cpf": cpf
             }
         }
     )
