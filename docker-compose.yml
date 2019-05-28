@@ -4,12 +4,12 @@ web:
   ports:
     - "5000:5000"
   volumes:
-    - .:/app
+    - .:/models
   links:
     - db
   environment:
    - ENV=development
    - PORT=5000
-   - DB=mongodb://mongodb:27017/todoDev
+   - DB=mongodb://mongodb:27017/restdb
 db:
   image: mongo:3.0.2
