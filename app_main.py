@@ -72,9 +72,9 @@ def get_all_alunos():
              'cpf': aluno_obj['cpf'],
              'cursos matriculados': soma_cursos})
         if len(retorno) == 0:
-            return jsonify({"data": Messages.NONE})
+            return jsonify({"data": Messages.NONE}), 200
 
-    return jsonify({'alunos': retorno})
+    return jsonify({'alunos': retorno}), 200
 
 
 @app.route("/aluno/<aluno_id>", methods=['GET'])
@@ -82,10 +82,10 @@ def get_aluno(aluno_id=None):
     alunos = mongo.db.alunos
     aluno_obj = alunos.find_one({'id': aluno_id})
     if not aluno_obj:
-        return jsonify(Messages.NONE)
+        return jsonify(Messages.NONE), 200
 
     aluno_obj.pop('_id')
-    return jsonify(aluno_obj)
+    return jsonify(aluno_obj), 200
 
 
 @app.route("/aluno", methods=['POST'])
@@ -95,7 +95,7 @@ def create_aluno():
 
     print(request_obj.data)
     if request_obj.errors:
-        return jsonify({"errorCode": [request_obj.errors]}), 404
+        return jsonify({"errorCode": [request_obj.errors]}), 400
 
     request_data = request_obj.data
     nome = request_data['nome']
@@ -117,7 +117,12 @@ def create_aluno():
 
 @app.route("/aluno/<aluno_id>", methods=['PUT'])
 def set_aluno_name(aluno_id):
-    request_data = request.get_json()
+    request_obj = AlunoSchema().load(request.get_json())
+
+    if request_obj.errors:
+        return jsonify({"errorCode": [request_obj.errors]}), 400
+
+    request_data = request_obj.data
     nome = request_data['nome']
     sobrenome = request_data['sobrenome']
     data_nascimento = request_data['data_nascimento']
@@ -135,7 +140,7 @@ def set_aluno_name(aluno_id):
         }
     )
 
-    return jsonify({"data": Messages.UPDATED})
+    return jsonify({"data": Messages.UPDATED}), 201
 
 
 @app.route("/aluno/<aluno_id>", methods=['DELETE'])
@@ -148,7 +153,7 @@ def delete_aluno(aluno_id):
         retorno = Messages.EMPTY
     else:
         retorno = Messages.DELETED
-    return jsonify({'data': retorno})
+    return jsonify({'data': retorno}), 200
 
 
 @app.route("/aluno/totais/<aluno_id>", methods=['GET'])
@@ -167,7 +172,7 @@ def get_totais_alunos(aluno_id):
     for quantidade in id_alunos_not_equals:
         soma_alunos = id_alunos.count(quantidade)
 
-    return jsonify({'Total de cursos matriculados': soma_alunos})
+    return jsonify({'Total de cursos matriculados': soma_alunos}), 200
 
 @app.route("/curso", methods=['GET'])
 def get_all_cursos():
@@ -193,9 +198,9 @@ def get_all_cursos():
              'quantidade de inscritos': soma_cursos})
 
         if len(retorno) == 0:
-            return jsonify({"message": Messages.EMPTY})
+            return jsonify({"message": Messages.EMPTY}), 200
 
-    return jsonify({'data': retorno})
+    return jsonify({'data': retorno}), 200
 
 
 @app.route("/curso/<curso_id>", methods=['GET'])
@@ -206,7 +211,7 @@ def get_curso(curso_id=None):
         return jsonify({"message": "Curso não encontrado!"})
 
     cursos_obj.pop('_id')
-    return jsonify(cursos_obj)
+    return jsonify(cursos_obj), 200
 
 
 @app.route("/curso", methods=['POST'])
@@ -224,7 +229,7 @@ def create_curso():
         'nome': nome,
         'carga_horaria': carga_horaria})
 
-    return jsonify({'data': Messages.CREATED})
+    return jsonify({'data': Messages.CREATED}), 200
 
 
 @app.route("/curso/<curso_id>", methods=['PUT'])
@@ -257,7 +262,7 @@ def delete_curso(curso_id=None):
         retorno = "Erro ao excluir curso"
     else:
         retorno = Messages.DELETED
-    return jsonify({'data': retorno})
+    return jsonify({'data': retorno}), 200
 
 
 @app.route("/curso/totais", methods=['GET'])
@@ -285,7 +290,7 @@ def get_totais():
 
     dict_cursos = dict(zip(nome_cursos, soma_cursos))
 
-    return jsonify({'Totais de matriculados': dict_cursos})
+    return jsonify({'Totais de matriculados': dict_cursos}), 200
 
 
 @app.route("/matricula", methods=['POST'])
@@ -313,7 +318,7 @@ def create_matricula():
         'id_curso': id_curso,
         'data': data})
 
-    return jsonify({'data': Messages.CREATED, "id": id})
+    return jsonify({'data': Messages.CREATED, "id": id}), 200
 
 
 @app.route("/matricula/<matricula_id>", methods=['DELETE'])
@@ -326,7 +331,7 @@ def delete_matricula(matricula_id):
         retorno = "Error"
     else:
         retorno = "matricula excluido"
-    return jsonify({'mensagem': retorno})
+    return jsonify({'mensagem': retorno}), 200
 
 
 if __name__ == '__main__':
